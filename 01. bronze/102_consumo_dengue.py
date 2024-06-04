@@ -8,12 +8,22 @@ from pyspark.sql.types import *
 
 # COMMAND ----------
 
-spark = SparkSession.builder.appName("ChikungunyaData").getOrCreate()
+spark = SparkSession.builder.appName("DengueData").getOrCreate()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Consumo dados de Chikungunya de 2020, 2022 e 2023
+# MAGIC # Dados de Chikungunya Notificados da Região de Saúde de Sorocaba
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC A região de saúde de Sorocaba engloba as cidades de Alumínio, Araçariguama, Araçoiaba da Serra, Boituva, Capela do Alto, Ibiúna, Iperó, Itu, Jumirim, Mairinque, Piedade, Pilar do Sul, Porto Feliz, Salto, Salto de Pirapora, São Roque, Sorocaba, iraí, Tietê, Votorantim
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Consumo dados dos anos 2020, 2022 e 2023
 
 # COMMAND ----------
 
@@ -63,6 +73,9 @@ df_final_dengue['Ano'] = anos
 
 df_final = spark.createDataFrame(df_final_dengue)
 
+# COMMAND ----------
+
+df_final.display()
 
 # COMMAND ----------
 
@@ -87,33 +100,42 @@ df_resetado.display()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Consumo dados de Chikungunya de 2021
+# MAGIC ## Consumo dados do ano de 2021
 
 # COMMAND ----------
 
 url_21 = "https://www.saude.sp.gov.br/resources/cve-centro-de-vigilancia-epidemiologica/areas-de-vigilancia/doencas-de-transmissao-por-vetores-e-zoonoses/dados/dengue/2021/dengue21_import_autoc_mes.htm"
 
-response_21 = requests.get(url)
-soup_21 = BeautifulSoup(response.text, 'html.parser')
+response_21 = requests.get(url_21)
+soup_21 = BeautifulSoup(response_21.text, 'html.parser')
 
 # Encontrar a tabela específica
-table_21 = soup.find('table')
+table_21 = soup_21.find('table')
 
-chikungunya_2021 = pd.read_html(str(table))[0].iloc[5:, :43].reset_index(drop=True).astype(str)
+# dengue_2021 = pd.read_html(str(table_21))[0].iloc[5:, :].reset_index(drop=True).astype(str)
+dengue_2021 = pd.read_html(str(table_21))[0].iloc[5:, :43].reset_index(drop=True).astype(str)
 
 # Filtrar o DataFrame pela coluna 2 contendo a palavra 'sorocaba'
-df_2021_filtro = chikungunya_2021[chikungunya_2021.iloc[:, 2].str.upper() == 'SOROCABA']
+df_2021_filtro = dengue_2021[dengue_2021.iloc[:, 2].str.upper() == 'SOROCABA']
 
 
-df_chikungunya_2021 = spark.createDataFrame(df_2021_filtro)
+df_dengue_2021 = spark.createDataFrame(df_2021_filtro)
 
 # COMMAND ----------
 
-selecao_colunas_2021 = df_chikungunya_2021.columns[3:43]
-df_selecao_2021 = (df_chikungunya_2021
-    .withColumn('ano', lit(2021))               
+df_dengue_2021.display()
+
+# COMMAND ----------
+
+selecao_colunas_2021 = df_dengue_2021.columns[3:45]
+df_selecao_2021 = (df_dengue_2021
+    .withColumn('ano', lit(2021))              
     .select(*selecao_colunas_2021, 'ano')
 )
+
+# COMMAND ----------
+
+df_selecao_2021.display()
 
 # COMMAND ----------
 
@@ -130,34 +152,34 @@ df_resetado_2021.display()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # Consumo dados de Chikungunya de 2024 (até abril)
+# MAGIC ## Consumo dados do ano de 2024 até abril
 
 # COMMAND ----------
 
 url_24 = "https://www.saude.sp.gov.br/resources/cve-centro-de-vigilancia-epidemiologica/areas-de-vigilancia/doencas-de-transmissao-por-vetores-e-zoonoses/dados/dengue/2024/dengue24_mes.htm"
 
-response_24 = requests.get(url)
-soup_24 = BeautifulSoup(response.text, 'html.parser')
+response_24 = requests.get(url_24)
+soup_24 = BeautifulSoup(response_24.text, 'html.parser')
 
 # Encontrar a tabela específica
-table_24 = soup.find('table')
+table_24 = soup_24.find('table')
 
-chikungunya_2024 = pd.read_html(str(table))[0].iloc[5:, 5:17].reset_index(drop=True).astype(str)
+dengue_2024 = pd.read_html(str(table_24))[0].iloc[5:, 5:17].reset_index(drop=True).astype(str)
 
 # Filtrar o DataFrame pela coluna 2 contendo a palavra 'sorocaba'
-df_2024_filtro = chikungunya_2024[chikungunya_2024.iloc[:, 0].str.upper() == 'SOROCABA']
+df_2024_filtro = dengue_2024[dengue_2024.iloc[:, 0].str.upper() == 'SOROCABA']
 
 
-df_chikungunya_2024 = spark.createDataFrame(df_2024_filtro)
-
-# COMMAND ----------
-
-df_2024_filtro.display()
+df_dengue_2024 = spark.createDataFrame(df_2024_filtro)
 
 # COMMAND ----------
 
-selecao_colunas_2024 = df_chikungunya_2021.columns[6:17]
-df_selecao_2024 = (df_chikungunya_2024
+dengue_2024.display()
+
+# COMMAND ----------
+
+selecao_colunas_2024 = df_dengue_2021.columns[6:17]
+df_selecao_2024 = (df_dengue_2024
     .withColumn('ano', lit(2024))
     .withColumn('6', regexp_replace('6', '^[0-9]+ ', ''))               
     .select(*selecao_colunas_2024, 'ano')
@@ -190,11 +212,11 @@ df_resetado_2024.display()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # União dos DFs
+# MAGIC ## União dos DFs
 
 # COMMAND ----------
 
-df_chikung_20_23 = (df_resetado
+df_dengue_20_23 = (df_resetado
                     .union(df_resetado_2021)
                     .fillna('0')
                     .replace('nan', '0')
@@ -202,15 +224,20 @@ df_chikung_20_23 = (df_resetado
 
 # COMMAND ----------
 
-df_final_chikung = (df_chikung_20_23.unionByName(df_resetado_2024, allowMissingColumns=True))
+df_final_dengue = (df_dengue_20_23.unionByName(df_resetado_2024, allowMissingColumns=True))
 
 # COMMAND ----------
 
-df_final_chikung.display()
+df_final_dengue.display()
 
 # COMMAND ----------
 
-df_final_chikung.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save('dbfs:/mnt/dbstoragehnadwxeer7qfg/bronze/chikungunya_jan2020_abr2024')
+# MAGIC %md
+# MAGIC ## Salvando a tabela delta
+
+# COMMAND ----------
+
+df_final_dengue.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save('dbfs:/mnt/dbstoragehnadwxeer7qfg/bronze/dengue_jan2020_abr2024')
 
 # COMMAND ----------
 
