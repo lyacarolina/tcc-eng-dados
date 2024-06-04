@@ -13,7 +13,17 @@ spark = SparkSession.builder.appName("ChikungunyaData").getOrCreate()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Consumo dados de Chikungunya de 2020, 2022 e 2023
+# MAGIC # Dados de Chikungunya Notificados da Região de Saúde de Sorocaba
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC A região de saúde de Sorocaba engloba as cidades de Alumínio, Araçariguama, Araçoiaba da Serra, Boituva, Capela do Alto, Ibiúna, Iperó, Itu, Jumirim, Mairinque, Piedade, Pilar do Sul, Porto Feliz, Salto, Salto de Pirapora, São Roque, Sorocaba, iraí, Tietê, Votorantim
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Consumo dados dos anos 2020, 2022 e 2023
 
 # COMMAND ----------
 
@@ -86,19 +96,19 @@ df_resetado.display()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Consumo dados de Chikungunya de 2021
+# MAGIC ## Consumo dados do ano de 2021
 
 # COMMAND ----------
 
 url_21 = "https://www.saude.sp.gov.br/resources/cve-centro-de-vigilancia-epidemiologica/areas-de-vigilancia/doencas-de-transmissao-por-vetores-e-zoonoses/dados/chikung/2021/chikung21_import_autoc_res.htm"
 
-response_21 = requests.get(url)
-soup_21 = BeautifulSoup(response.text, 'html.parser')
+response_21 = requests.get(url_21)
+soup_21 = BeautifulSoup(response_21.text, 'html.parser')
 
 # Encontrar a tabela específica
-table_21 = soup.find('table')
+table_21 = soup_21.find('table')
 
-chikungunya_2021 = pd.read_html(str(table))[0].iloc[5:, :43].reset_index(drop=True).astype(str)
+chikungunya_2021 = pd.read_html(str(table_21))[0].iloc[5:, :43].reset_index(drop=True).astype(str)
 
 # Filtrar o DataFrame pela coluna 2 contendo a palavra 'sorocaba'
 df_2021_filtro = chikungunya_2021[chikungunya_2021.iloc[:, 2].str.upper() == 'SOROCABA']
@@ -129,19 +139,19 @@ df_resetado_2021.display()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # Consumo dados de Chikungunya de 2024 (até abril)
+# MAGIC ## Consumo dados do ano de 2024 até abril
 
 # COMMAND ----------
 
 url_24 = "https://www.saude.sp.gov.br/resources/cve-centro-de-vigilancia-epidemiologica/areas-de-vigilancia/doencas-de-transmissao-por-vetores-e-zoonoses/dados/chikung/2024/chikung24_mes.htm"
 
-response_24 = requests.get(url)
-soup_24 = BeautifulSoup(response.text, 'html.parser')
+response_24 = requests.get(url_24)
+soup_24 = BeautifulSoup(response_24.text, 'html.parser')
 
 # Encontrar a tabela específica
-table_24 = soup.find('table')
+table_24 = soup_24.find('table')
 
-chikungunya_2024 = pd.read_html(str(table))[0].iloc[5:, 5:17].reset_index(drop=True).astype(str)
+chikungunya_2024 = pd.read_html(str(table_24))[0].iloc[5:, 5:17].reset_index(drop=True).astype(str)
 
 # Filtrar o DataFrame pela coluna 2 contendo a palavra 'sorocaba'
 df_2024_filtro = chikungunya_2024[chikungunya_2024.iloc[:, 0].str.upper() == 'SOROCABA']
@@ -189,7 +199,7 @@ df_resetado_2024.display()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # União dos DFs
+# MAGIC ## União dos DFs
 
 # COMMAND ----------
 
